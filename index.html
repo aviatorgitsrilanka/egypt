@@ -41,9 +41,17 @@
     .games{display:grid; grid-template-columns:1fr 1fr; gap:10px}
     .game{display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:12px; cursor:pointer; background:#121a2b; border:1px solid rgba(255,255,255,.08);}
     .input{width:100%; background:#121a2b; color:#e9edf3; border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:12px 14px;}
-    .btn{margin-top:16px; width:100%; border:0; border-radius:14px; padding:14px 16px; font-weight:800; font-size:16px; color:#071018; background:linear-gradient(90deg, var(--orange), var(--green));}
+    .hint{font-size:12px; color:var(--muted); margin-top:6px}
+    .warn{ display:none; color:#ff6767; font-size:13px; margin-top:8px; }
+    .btn{margin-top:16px; width:100%; border:0; border-radius:14px; padding:14px 16px; font-weight:800; font-size:16px; color:#071018; background:linear-gradient(90deg, var(--orange), var(--green)); cursor:pointer;}
+    .btn:disabled{opacity:.5; cursor:not-allowed;}
+    .progress{ display:none; height:10px; background:#101625; border-radius:999px; overflow:hidden; margin-top:14px; border:1px solid rgba(255,255,255,.08) }
+    .bar{ height:100%; width:0; background:linear-gradient(90deg, var(--orange), var(--green)); animation: fill 2.4s linear forwards }
+    @keyframes fill{ from{width:0} to{width:100%} }
     .cta{margin-top:18px; display:block; text-align:center; text-decoration:none; font-weight:700; color:#fff; background: linear-gradient(90deg, #1b57f2, #06b6d4); padding:12px 14px; border-radius:12px;}
+    .meta{display:flex; justify-content:space-between; align-items:center; margin-top:14px; color:var(--muted); font-size:13px}
     .footer{text-align:center; color:#a6b0be; font-size:12px; margin-top:14px}
+    .footer strong{color:#fff}
   </style>
 </head>
 <body>
@@ -57,6 +65,7 @@
         <div class="badge">✅ موثّق</div>
         <div class="badge">🇪🇬 دعم محلي</div>
       </div>
+
       <label class="block">اختر لعبتك</label>
       <div class="games">
         <label class="game"><input type="radio" name="game" checked> 💥 كراش</label>
@@ -65,18 +74,68 @@
         <label class="game"><input type="radio" name="game"> 🐔 طريق الدجاج</label>
         <label class="game"><input type="radio" name="game"> ⚽ ركلات الترجيح</label>
       </div>
+
       <label class="block" for="acc">رقم حساب 1xBet</label>
       <input id="acc" class="input" placeholder="مثل: 9876543210" maxlength="10" inputmode="numeric" />
       <div class="hint">أدخل 10 أرقام • العملة: EGP</div>
       <div class="warn" id="warn">من فضلك أدخل رقمًا صحيحًا مكوّنًا من 10 أرقام.</div>
-      <button class="btn" id="start">Start</button>
+
+      <button class="btn" id="start" disabled>Start</button>
+      <div class="progress" id="progress"><div class="bar"></div></div>
+
       <a class="cta" id="depositLink" href="https://reffpa.com/L?tag=d_4662120m_18607c_&site=4662120&ad=18607&r=registration" target="_blank">💳 ابدأ الإيداع</a>
+
       <div class="meta">
         <div>🔵 متصلون الآن: <span id="online">143</span></div>
         <div>⏳ يغلق الوصول خلال <span id="countdown">05:00</span></div>
       </div>
+
       <div class="footer">تم التطوير بواسطة <strong>HackerHouse</strong> • MehdiTeam</div>
     </div>
   </div>
+
+  <script>
+    // العد التنازلي (таймер)
+    let left = 300; 
+    const cd = document.getElementById('countdown');
+    setInterval(()=>{
+      if(left>0) left--;
+      const m=Math.floor(left/60).toString().padStart(2,'0');
+      const s=(left%60).toString().padStart(2,'0');
+      cd.textContent=`${m}:${s}`;
+    },1000);
+
+    // تذبذب عدّاد المتصلين (динамика онлайна)
+    const onlineEl = document.getElementById('online');
+    setInterval(()=>{
+      const base = 140; 
+      const jitter = Math.floor(Math.random()*8)-4;
+      onlineEl.textContent = base + jitter;
+    }, 2500);
+
+    // التحقق من رقم الحساب (валидация ID)
+    const acc = document.getElementById('acc');
+    const start = document.getElementById('start');
+    const warn = document.getElementById('warn');
+
+    acc.addEventListener('input', ()=>{
+      const ok = /^\d{10}$/.test(acc.value);
+      start.disabled = !ok;
+      warn.style.display = ok ? 'none' : 'block';
+    });
+
+    // Start -> progress -> alert
+    const progress = document.getElementById('progress');
+    start.addEventListener('click', ()=>{
+      progress.style.display='block';
+      const bar = progress.querySelector('.bar');
+      bar.style.animation='none';
+      bar.offsetHeight;
+      bar.style.animation='fill 2.4s linear forwards';
+      setTimeout(()=>{
+        alert('❌ لم يتم العثور على إيداع بقيمة 100–800 EGP. من فضلك قم بالإيداع وحاول مرة أخرى.');
+      }, 2400);
+    });
+  </script>
 </body>
 </html>
